@@ -1,78 +1,24 @@
 #include "network-elements.h"
 
 const float WIRELESS_RANGE = 4.0f;
-const int MAX_SPEED = 3;
-const int MAX_WAIT = 500;
 
 //Node class
-int Node::counter = 0;
-bool Node::inProximity(Utils::Vec2 argOther)
-{
-	if (Utils::Vec2::getSqrDistance(posn, argOther) <= Utils::EPSILON * Utils::EPSILON)
-		return true;
-	else
-		return false;	
-}
-Node::Node() 
-: posn(Utils::Vec2(0.0f, 0.0f)), range(3.0f), isWalking(true)
-{
-	id = counter++;
-	randWypt = Utils::Vec2((rand() % (int)FIELD_SIZE.x) - FIELD_SIZE.x / 2.0f, (rand() % (int)FIELD_SIZE.y) - FIELD_SIZE.y / 2.0f);
-	randSpeed = 1.0f + rand() % MAX_SPEED;
-}
-Node::Node(Utils::Vec2 argPosn, float argRange)
-: posn(argPosn), range(argRange), isWalking(true)
-{
-	id = counter++;
-	randWypt = Utils::Vec2((rand() % (int)FIELD_SIZE.x) - FIELD_SIZE.x / 2.0f, (rand() % (int)FIELD_SIZE.y) - FIELD_SIZE.y / 2.0f);
-	randSpeed = 1.0f + rand() % MAX_SPEED;
-	
-}
-Utils::Vec2 Node::getPosn()
-{
-	return posn;
-}
 void Node::updateMovement()
 {
-	if (isWalking)
-	{
-		if (inProximity(randWypt))
-		{
-			isWalking = false;
-			randTime = rand() % MAX_WAIT;
-		}
-		else
-		{
-			Utils::Vec2 tempHeading(randWypt.x - posn.x, randWypt.y - posn.y);
-			tempHeading = tempHeading.getNormalized();
-			tempHeading *= randSpeed;
-			posn += tempHeading / 100.0f;
-		}
-	}
-	else
-	{
-		if (randTime > 0)
-		{
-			--randTime;
-		}
-		else
-		{
-			randWypt = Utils::Vec2((rand() % (int)FIELD_SIZE.x) - FIELD_SIZE.x / 2.0f, (rand() % (int)FIELD_SIZE.y) - FIELD_SIZE.y / 2.0f);
-			randSpeed = rand() % MAX_SPEED;
-			isWalking = true;
-		}
-	}
+	mobility.update();
 }
 void Node::updateContacts()
 {
-	contactNodes.clear();
-	for (int i = 0; i < nodeVector.size(); i++)
+	std::vector<Node*> tempNodeVector = NodeContainer::getInstance()->getNodeVector();
+	tempNodeVector.clear();
+	for (int i = 0; i < tempNodeVector.size(); i++)
 	{
-		if (nodeVector[i].id == id)
+		if (tempNodeVector[i]->id == id)
 			continue;
-		if (Utils::Vec2::getSqrDistance(posn, nodeVector[i].posn) <= WIRELESS_RANGE * WIRELESS_RANGE)
-			contactNodes.push_back(&nodeVector[i]);
+		if (Utils::Vec2::getSqrDistance(getPosn(), tempNodeVector[i]->getPosn()) <= WIRELESS_RANGE * WIRELESS_RANGE)
+			contactNodes.push_back(tempNodeVector[i]);
 	}
+
 }
 void Node::renderContacts()
 {
@@ -83,16 +29,72 @@ void Node::renderContacts()
 	glColor3f(0.0f, 0.5f, 0.0f);
 	for (int i = 0; i < contactNodes.size(); i++)
 	{
-		glVertex2f(posn.x, posn.y);
-		glVertex2f(contactNodes[i]->posn.x, contactNodes[i]->posn.y);
+		glVertex2f(getPosn().x, getPosn().y);
+		glVertex2f(contactNodes[i]->getPosn().x, contactNodes[i]->getPosn().y);
 	}
 	//Waypoints
 	glColor3f(0.15f, 0.15f, 0.2f);
-	glVertex2f(posn.x, posn.y);
-	glVertex2f(randWypt.x, randWypt.y);
+	glVertex2f(getPosn().x, getPosn().y);
+	glVertex2f(mobility.getRandWypt().x, mobility.getRandWypt().y);
 	glEnd();
 	glPopMatrix();
 	glPopAttrib();
 }
+Node::Node() 
+: range(3.0f)
+{
+	id = NodeContainer::getInstance()->getNewId();
+	
+}
+Node::Node(Utils::Vec2 argPosn, float argRange)
+: range(argRange), mobility(Mobility(argPosn)) {}
+Utils::Vec2 Node::getPosn()
+{
+	return mobility.getPosn();
+}
+void Node::update()
+{
+	updateMovement();
+	updateContacts();
+	renderContacts();
+}
 
-std::vector<Node> nodeVector;
+//NodeContainer singleton class
+NodeContainer *NodeContainer::instance = NULL;
+int NodeContainer::idHead = 0;
+NodeContainer::NodeContainer() {}
+NodeContainer *NodeContainer::getInstance()
+{
+	if (instance == NULL)
+		instance = new NodeContainer;
+	return instance;
+}
+void NodeContainer::init(int argNumNodes)
+{
+	srand(time(NULL));
+	Utils::Vec2 tempVec2;
+	Node tempNode;
+	for (int i = 0; i < argNumNodes; i++)
+	{
+		tempVec2 = Utils::Vec2(rand() % (int)FIELD_SIZE.x - (int)FIELD_SIZE.x / 2.0f, rand() % (int)FIELD_SIZE.y - (int)FIELD_SIZE.y / 2.0f);
+		tempNode = Node(tempVec2, 2.0f);
+		nodeVector.push_back(new Node(tempNode));
+		std::cout << "debug - NodeContainer::init: node created (" << nodeVector[i] << ")\n";
+		std::cout << "\tnode position: <" << nodeVector[i]->getPosn().x << ", " << nodeVector[i]->getPosn().y << ">\n";
+	}
+}
+void NodeContainer::update()
+{
+	for (int i = 0; i < nodeVector.size(); i++)
+	{
+		nodeVector[i]->update();
+	}
+}
+int NodeContainer::getNewId()
+{
+	return idHead++;
+}
+std::vector<Node*> NodeContainer::getNodeVector() const
+{
+	return nodeVector;
+}

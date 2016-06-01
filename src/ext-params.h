@@ -5,7 +5,6 @@
 
 extern const Utils::Vec2 FIELD_SIZE;
 extern const float WIRELESS_RANGE;
-extern const int MAX_SPEED;
-extern const int MAX_WAIT;
+extern bool showAnnotations;
 
 #endif //EXT_PARAMS_H_INCLUDED

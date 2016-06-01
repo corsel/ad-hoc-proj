@@ -3,33 +3,44 @@
 
 #include "ext-params.h"
 #include "utils.h"
+#include "mobility.h"
 #include <vector>
 
 class Node
 {
 private: 
-	bool isWalking;
-	int randTime;
-	Utils::Vec2 randWypt;
-	float randSpeed;
-	
-	static int counter;
+	Mobility mobility;
 	int id;
 	float range;
-	Utils::Vec2 posn;
 	std::vector<Node*> contactNodes;
 	
-	bool inProximity(Utils::Vec2 argOther);
+	void updateMovement(void);
+	void updateContacts(void);
+	void renderContacts(void);
 	
 public:
 	Node(void);
 	Node(Utils::Vec2 argPosn, float argRange);
 	Utils::Vec2 getPosn(void);
-	void updateMovement(void);
-	void updateContacts(void);
-	void renderContacts(void);
+	void update(void);
 };
 
-extern std::vector<Node> nodeVector;
+
+class NodeContainer //Singleton
+{
+private:
+	static NodeContainer *instance;
+	std::vector<Node*> nodeVector;
+	static int idHead;
+	
+	NodeContainer(void);
+	
+public:
+	static NodeContainer* getInstance(void);
+	void init(int argNumNodes);
+	void update(void);
+	int getNewId(void);
+	std::vector<Node*> getNodeVector(void) const;
+};
 
 #endif //NETWORK_ELEMENTS_H_INCLUDED

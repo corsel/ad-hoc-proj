@@ -8,10 +8,10 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const Utils::Vec2 FIELD_SIZE(15.0f, 15.0f);
-const int NUM_INIT_NODES = 9;
+const Utils::Vec2 FIELD_SIZE(25.0f, 25.0f);
+const int NUM_INIT_NODES = 13;
 bool showAnnotations = true;
-float scaleFactor = 0.1f;
+float scaleFactor = 0.075f;
 
 void displayFunc()
 {
@@ -21,21 +21,22 @@ void displayFunc()
 	glScalef(scaleFactor * 1000 / SCREEN_WIDTH, scaleFactor * 1000 / SCREEN_HEIGHT, 1.0f);
 	
 	//Nodes
-	for (int i = 0; i < nodeVector.size(); i++)
-		nodeVector[i].updateMovement();
+	NodeContainer::getInstance()->update();
+	
 	glPushAttrib(GL_LINE_BIT);
 	glLineWidth(3);
 	glEnable(GL_LINE_SMOOTH);
-	for (int i = 0; i < nodeVector.size(); i++)
+	
+	std::vector<Node*> tempNodeVector = NodeContainer::getInstance()->getNodeVector();
+	for (int i = 0; i < tempNodeVector.size(); i++)
 	{
-		nodeVector[i].updateContacts();
 		glPushMatrix();
-		glTranslatef(nodeVector[i].getPosn().x, nodeVector[i].getPosn().y, 0.0f);
+		glTranslatef(tempNodeVector[i]->getPosn().x, tempNodeVector[i]->getPosn().y, 0.0f);
 		Utils::drawCircle(0.3f, Utils::Color(0.2f, 0.3f, 0.5f));
 		
 		//Wireless range circles
 		if (showAnnotations)
-			Utils::drawCircle(WIRELESS_RANGE, Utils::Color(1.0f, 0.0f, 0.0f), false, true);
+			Utils::drawCircle(WIRELESS_RANGE, Utils::Color(1.0f, 0.2f, 0.2f), false, true);
 		
 		glPopMatrix();
 	}
@@ -56,28 +57,16 @@ void displayFunc()
 		glPopAttrib();
 		glPopMatrix();
 		
-		//Contacts
-		for (int i = 0; i < nodeVector.size(); i++)
-		{
-			nodeVector[i].renderContacts();
-		}
+		NodeContainer::getInstance()->update();
 	}
 	glutSwapBuffers();
 }
 
 void init()
 {
-	srand(time(NULL));
-	Utils::Vec2 tempVec2;
-	Node tempNode;
-	for (int i = 0; i < NUM_INIT_NODES; i++)
-	{
-		tempVec2 = Utils::Vec2(rand() % (int)(int)FIELD_SIZE.x - (int)FIELD_SIZE.x / 2.0f, rand() % (int)(int)FIELD_SIZE.y - (int)FIELD_SIZE.y / 2.0f);
-		tempNode = Node(tempVec2, 2.0f);
-		nodeVector.push_back(tempNode);
-	}
+	NodeContainer::getInstance()->init(NUM_INIT_NODES);
 }
- 
+
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
