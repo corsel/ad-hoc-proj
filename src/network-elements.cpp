@@ -10,7 +10,7 @@ void Node::updateMovement()
 void Node::updateContacts()
 {
 	std::vector<Node*> tempNodeVector = NodeContainer::getInstance()->getNodeVector();
-	tempNodeVector.clear();
+	contactNodes.clear();
 	for (int i = 0; i < tempNodeVector.size(); i++)
 	{
 		if (tempNodeVector[i]->id == id)
@@ -27,10 +27,12 @@ void Node::renderContacts()
 	glLineWidth(2.0f);
 	glBegin(GL_LINES);
 	glColor3f(0.0f, 0.5f, 0.0f);
+	//std::cout << "debug - Node::renderContacts: node " << id << std::endl;
 	for (int i = 0; i < contactNodes.size(); i++)
 	{
 		glVertex2f(getPosn().x, getPosn().y);
 		glVertex2f(contactNodes[i]->getPosn().x, contactNodes[i]->getPosn().y);
+		//std::cout << "\thas contact with " << contactNodes[i]->id << std::endl;	
 	}
 	//Waypoints
 	glColor3f(0.15f, 0.15f, 0.2f);
@@ -44,10 +46,12 @@ Node::Node()
 : range(3.0f)
 {
 	id = NodeContainer::getInstance()->getNewId();
-	
 }
 Node::Node(Utils::Vec2 argPosn, float argRange)
-: range(argRange), mobility(Mobility(argPosn)) {}
+: range(argRange), mobility(Mobility(argPosn)) 
+{
+	id = NodeContainer::getInstance()->getNewId();
+}
 Utils::Vec2 Node::getPosn()
 {
 	return mobility.getPosn();

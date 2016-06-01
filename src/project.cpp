@@ -8,10 +8,10 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const Utils::Vec2 FIELD_SIZE(25.0f, 25.0f);
-const int NUM_INIT_NODES = 13;
+const Utils::Vec2 FIELD_SIZE(50.0f, 50.0f);
+const int NUM_INIT_NODES = 100;
 bool showAnnotations = true;
-float scaleFactor = 0.075f;
+float scaleFactor = 0.03f;
 
 void displayFunc()
 {
