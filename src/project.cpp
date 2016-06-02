@@ -3,22 +3,26 @@
 #include "utils.h"
 #include <GL/gl.h>
 #include <GL/freeglut.h>
+//#include <stdlib.h>
 #include <time.h>
 #include <iostream>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const Utils::Vec2 FIELD_SIZE(50.0f, 50.0f);
-const int NUM_INIT_NODES = 100;
-bool showAnnotations = true;
-float scaleFactor = 0.03f;
+const int NUM_INIT_NODES = 10;
+const float WIRELESS_RANGE = 4.0f;
+bool showContacts = true;
+bool showRanges = false;
+bool showWypts = false;
+const float SCALE_FACTOR = 0.03f;
 
 void displayFunc()
 {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
-	glScalef(scaleFactor * 1000 / SCREEN_WIDTH, scaleFactor * 1000 / SCREEN_HEIGHT, 1.0f);
+	glScalef(SCALE_FACTOR * 1000 / SCREEN_WIDTH, SCALE_FACTOR * 1000 / SCREEN_HEIGHT, 1.0f);
 	
 	//Nodes
 	NodeContainer::getInstance()->update();
@@ -35,36 +39,29 @@ void displayFunc()
 		Utils::drawCircle(0.3f, Utils::Color(0.2f, 0.3f, 0.5f));
 		
 		//Wireless range circles
-		if (showAnnotations)
+		if (showRanges)
 			Utils::drawCircle(WIRELESS_RANGE, Utils::Color(1.0f, 0.2f, 0.2f), false, true);
 		
 		glPopMatrix();
 	}
 	glPopAttrib();
 	
-	if (showAnnotations)
-	{
-		//Field limits
-		glPushAttrib(GL_LINE_BIT);
-		glBegin(GL_LINE_STRIP);
-		glColor3f(1.0f, 0.1f, 0.1f);
-		glVertex2f(-(int)FIELD_SIZE.x / 2.0f, -(int)FIELD_SIZE.y / 2.0f);
-		glVertex2f((int)FIELD_SIZE.x / 2.0f, -(int)FIELD_SIZE.y / 2.0f);
-		glVertex2f((int)FIELD_SIZE.x / 2.0f, (int)FIELD_SIZE.y / 2.0f);
-		glVertex2f(-(int)FIELD_SIZE.x / 2.0f, (int)FIELD_SIZE.y / 2.0f);
-		glVertex2f(-(int)FIELD_SIZE.x / 2.0f, -(int)FIELD_SIZE.y / 2.0f);
-		glEnd();
-		glPopAttrib();
-		glPopMatrix();
-		
-		NodeContainer::getInstance()->update();
-	}
+	//Field limits
+	glPushAttrib(GL_LINE_BIT);
+	glBegin(GL_LINE_STRIP);
+	glColor3f(1.0f, 0.1f, 0.1f);
+	glVertex2f(-(int)FIELD_SIZE.x / 2.0f, -(int)FIELD_SIZE.y / 2.0f);
+	glVertex2f((int)FIELD_SIZE.x / 2.0f, -(int)FIELD_SIZE.y / 2.0f);
+	glVertex2f((int)FIELD_SIZE.x / 2.0f, (int)FIELD_SIZE.y / 2.0f);
+	glVertex2f(-(int)FIELD_SIZE.x / 2.0f, (int)FIELD_SIZE.y / 2.0f);
+	glVertex2f(-(int)FIELD_SIZE.x / 2.0f, -(int)FIELD_SIZE.y / 2.0f);
+	glEnd();
+	glPopAttrib();
+	glPopMatrix();
+	
+	NodeContainer::getInstance()->update();
+	
 	glutSwapBuffers();
-}
-
-void init()
-{
-	NodeContainer::getInstance()->init(NUM_INIT_NODES);
 }
 
 int main(int argc, char **argv)
@@ -74,7 +71,7 @@ int main(int argc, char **argv)
 	glutDisplayFunc(displayFunc);
 	glutIdleFunc(displayFunc);
 	
-	init();
+	NodeContainer::getInstance()->init(NUM_INIT_NODES);
 	
 	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	glutInitWindowPosition(300, 200);

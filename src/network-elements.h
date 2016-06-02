@@ -3,6 +3,7 @@
 
 #include "ext-params.h"
 #include "utils.h"
+#include "packet.h"
 #include "mobility.h"
 #include <vector>
 
@@ -10,6 +11,8 @@ class Node
 {
 private: 
 	Mobility mobility;
+	Buffer buffer;
+	PacketGenerator generator;
 	int id;
 	float range;
 	std::vector<Node*> contactNodes;
@@ -17,6 +20,7 @@ private:
 	void updateMovement(void);
 	void updateContacts(void);
 	void renderContacts(void);
+	void renderWypts(void);
 	
 public:
 	Node(void);
@@ -31,7 +35,7 @@ class NodeContainer //Singleton
 private:
 	static NodeContainer *instance;
 	std::vector<Node*> nodeVector;
-	static int idHead;
+	static int idCounter;
 	
 	NodeContainer(void);
 	

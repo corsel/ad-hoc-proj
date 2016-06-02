@@ -5,6 +5,8 @@
 
 extern const Utils::Vec2 FIELD_SIZE;
 extern const float WIRELESS_RANGE;
-extern bool showAnnotations;
+extern bool showContacts;
+extern bool showRanges;
+extern bool showWypts;
 
 #endif //EXT_PARAMS_H_INCLUDED

@@ -1,7 +1,5 @@
 #include "network-elements.h"
 
-const float WIRELESS_RANGE = 4.0f;
-
 //Node class
 void Node::updateMovement()
 {
@@ -34,7 +32,16 @@ void Node::renderContacts()
 		glVertex2f(contactNodes[i]->getPosn().x, contactNodes[i]->getPosn().y);
 		//std::cout << "\thas contact with " << contactNodes[i]->id << std::endl;	
 	}
+	glEnd();
+	glPopMatrix();
+	glPopAttrib();
+}
+void Node::renderWypts()
+{
 	//Waypoints
+	glPushAttrib(GL_LINE_BIT);
+	glPushMatrix();
+
 	glColor3f(0.15f, 0.15f, 0.2f);
 	glVertex2f(getPosn().x, getPosn().y);
 	glVertex2f(mobility.getRandWypt().x, mobility.getRandWypt().y);
@@ -43,12 +50,12 @@ void Node::renderContacts()
 	glPopAttrib();
 }
 Node::Node() 
-: range(3.0f)
+: range(3.0f), generator(&buffer)
 {
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::Node(Utils::Vec2 argPosn, float argRange)
-: range(argRange), mobility(Mobility(argPosn)) 
+: range(argRange), mobility(Mobility(argPosn)), generator(&buffer)
 {
 	id = NodeContainer::getInstance()->getNewId();
 }
@@ -59,13 +66,17 @@ Utils::Vec2 Node::getPosn()
 void Node::update()
 {
 	updateMovement();
+	generator.update();
 	updateContacts();
-	renderContacts();
+	if (showContacts)
+		renderContacts();
+	if (showWypts)
+		renderWypts();
 }
 
 //NodeContainer singleton class
 NodeContainer *NodeContainer::instance = NULL;
-int NodeContainer::idHead = 0;
+int NodeContainer::idCounter = 0;
 NodeContainer::NodeContainer() {}
 NodeContainer *NodeContainer::getInstance()
 {
@@ -83,8 +94,8 @@ void NodeContainer::init(int argNumNodes)
 		tempVec2 = Utils::Vec2(rand() % (int)FIELD_SIZE.x - (int)FIELD_SIZE.x / 2.0f, rand() % (int)FIELD_SIZE.y - (int)FIELD_SIZE.y / 2.0f);
 		tempNode = Node(tempVec2, 2.0f);
 		nodeVector.push_back(new Node(tempNode));
-		std::cout << "debug - NodeContainer::init: node created (" << nodeVector[i] << ")\n";
-		std::cout << "\tnode position: <" << nodeVector[i]->getPosn().x << ", " << nodeVector[i]->getPosn().y << ">\n";
+		//std::cout << "debug - NodeContainer::init: node created (" << nodeVector[i] << ")\n";
+		//std::cout << "\tnode position: <" << nodeVector[i]->getPosn().x << ", " << nodeVector[i]->getPosn().y << ">\n";
 	}
 }
 void NodeContainer::update()
@@ -96,7 +107,7 @@ void NodeContainer::update()
 }
 int NodeContainer::getNewId()
 {
-	return idHead++;
+	return idCounter++;
 }
 std::vector<Node*> NodeContainer::getNodeVector() const
 {
