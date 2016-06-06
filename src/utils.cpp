@@ -30,7 +30,9 @@ void Vec2::operator *=(float argOperand)
 	y *= argOperand;
 }
 
-//Color struct...
+//Color struct
+Color::Color()
+: red(float(rand() % 1000) / 1000.0f), green(float(rand() % 1000) / 1000.0f), blue(float(rand() % 1000) / 1000.0f) {}
 Color::Color(float argRed, float argGreen, float argBlue, float argAlpha /*= 1.0f*/)
 : red(argRed), green(argGreen), blue(argBlue), alpha(argAlpha) {}
 void drawCircle(float argRadius, Color argColor, bool argFilled/* = true*/, bool argDashed/*= false*/)
@@ -66,6 +68,18 @@ void drawCircle(float argRadius, Color argColor, bool argFilled/* = true*/, bool
 	}
 	glEnd();
 	glPopAttrib();
+	glPopMatrix();
+}
+void drawEnvelope(int argCount)
+{
+	glPushMatrix();
+	glColor4f(0.7f, 0.7f, 0.2f, 1.0f);
+	glBegin(GL_QUADS);
+	glVertex2f(0.8f, 0.5f);
+	glVertex2f(0.8f, -0.5f);
+	glVertex2f(-0.8f, -0.5f);
+	glVertex2f(-0.8f, 0.5f);
+	glEnd();
 	glPopMatrix();
 }
 }

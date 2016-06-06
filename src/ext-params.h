@@ -8,5 +8,6 @@ extern const float WIRELESS_RANGE;
 extern bool showContacts;
 extern bool showRanges;
 extern bool showWypts;
+extern bool showPackets;
 
 #endif //EXT_PARAMS_H_INCLUDED

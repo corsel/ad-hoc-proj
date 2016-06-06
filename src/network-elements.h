@@ -12,7 +12,7 @@ class Node
 private: 
 	Mobility mobility;
 	Buffer buffer;
-	PacketGenerator generator;
+	PacketGenerator *generator;
 	int id;
 	float range;
 	std::vector<Node*> contactNodes;
@@ -25,8 +25,10 @@ private:
 public:
 	Node(void);
 	Node(Utils::Vec2 argPosn, float argRange);
+	~Node(void);
 	Utils::Vec2 getPosn(void);
 	void update(void);
+	void renderPackets(int argPacketId = -1) const;
 };
 
 
@@ -44,6 +46,7 @@ public:
 	void init(int argNumNodes);
 	void update(void);
 	int getNewId(void);
+	static int getRandomDst(int argExcludedId);
 	std::vector<Node*> getNodeVector(void) const;
 };
 

@@ -21,7 +21,7 @@ Mobility::Mobility(Utils::Vec2 argPosn)
 : posn(argPosn), isWalking(true) 
 {
 	randWypt = Utils::Vec2((rand() % (int)FIELD_SIZE.x) - FIELD_SIZE.x / 2.0f, (rand() % (int)FIELD_SIZE.y) - FIELD_SIZE.y / 2.0f);
-	randSpeed = 1.0f + rand() % MAX_SPEED;	
+	randSpeed = 1.0f + rand() % MAX_SPEED;
 }
 Utils::Vec2 Mobility::getPosn() const
 {

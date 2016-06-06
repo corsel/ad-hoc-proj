@@ -25,12 +25,10 @@ void Node::renderContacts()
 	glLineWidth(2.0f);
 	glBegin(GL_LINES);
 	glColor3f(0.0f, 0.5f, 0.0f);
-	//std::cout << "debug - Node::renderContacts: node " << id << std::endl;
 	for (int i = 0; i < contactNodes.size(); i++)
 	{
 		glVertex2f(getPosn().x, getPosn().y);
 		glVertex2f(contactNodes[i]->getPosn().x, contactNodes[i]->getPosn().y);
-		//std::cout << "\thas contact with " << contactNodes[i]->id << std::endl;	
 	}
 	glEnd();
 	glPopMatrix();
@@ -41,8 +39,7 @@ void Node::renderWypts()
 	//Waypoints
 	glPushAttrib(GL_LINE_BIT);
 	glPushMatrix();
-
-	glColor3f(0.15f, 0.15f, 0.2f);
+	glColor3f(0.25f, 0.25f, 0.3f);
 	glVertex2f(getPosn().x, getPosn().y);
 	glVertex2f(mobility.getRandWypt().x, mobility.getRandWypt().y);
 	glEnd();
@@ -50,15 +47,18 @@ void Node::renderWypts()
 	glPopAttrib();
 }
 Node::Node() 
-: range(3.0f), generator(&buffer)
+: range(3.0f)
 {
+	generator = new NPacketGenerator(10);
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::Node(Utils::Vec2 argPosn, float argRange)
-: range(argRange), mobility(Mobility(argPosn)), generator(&buffer)
+: range(argRange), mobility(Mobility(argPosn))
 {
+	generator = new NPacketGenerator(10);
 	id = NodeContainer::getInstance()->getNewId();
 }
+Node::~Node() {}
 Utils::Vec2 Node::getPosn()
 {
 	return mobility.getPosn();
@@ -66,12 +66,20 @@ Utils::Vec2 Node::getPosn()
 void Node::update()
 {
 	updateMovement();
-	generator.update();
 	updateContacts();
+	
+	Packet const *tempPacket = generator->update(id, NodeContainer::getRandomDst(id));
+	if (tempPacket)
+		buffer.receive(tempPacket);
+	
 	if (showContacts)
 		renderContacts();
 	if (showWypts)
 		renderWypts();
+}
+void Node::renderPackets(int argPacketId) const 
+{
+	buffer.renderPackets();
 }
 
 //NodeContainer singleton class
@@ -94,8 +102,6 @@ void NodeContainer::init(int argNumNodes)
 		tempVec2 = Utils::Vec2(rand() % (int)FIELD_SIZE.x - (int)FIELD_SIZE.x / 2.0f, rand() % (int)FIELD_SIZE.y - (int)FIELD_SIZE.y / 2.0f);
 		tempNode = Node(tempVec2, 2.0f);
 		nodeVector.push_back(new Node(tempNode));
-		//std::cout << "debug - NodeContainer::init: node created (" << nodeVector[i] << ")\n";
-		//std::cout << "\tnode position: <" << nodeVector[i]->getPosn().x << ", " << nodeVector[i]->getPosn().y << ">\n";
 	}
 }
 void NodeContainer::update()
@@ -112,4 +118,9 @@ int NodeContainer::getNewId()
 std::vector<Node*> NodeContainer::getNodeVector() const
 {
 	return nodeVector;
+}
+int NodeContainer::getRandomDst(int argExcludedId) //static
+{
+	int tempId = rand() % (NodeContainer::idCounter - 1);
+	return (tempId < argExcludedId ? tempId : tempId + 1);
 }

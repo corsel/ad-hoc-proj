@@ -28,10 +28,12 @@ struct Color
 {
 	float red, green, blue, alpha;
 	
+	Color(void);
 	Color(float argRed, float argGreen, float argBlue, float argAlpha = 1.0f);
 };
 
 void drawCircle(float argRadius, Color argColor, bool argFilled = true, bool argDashed = false);
+void drawEnvelope(int argCount);
 }
 
 #endif //UTILS_H_INCLUDED
