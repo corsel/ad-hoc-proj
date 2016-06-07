@@ -73,12 +73,19 @@ void drawCircle(float argRadius, Color argColor, bool argFilled/* = true*/, bool
 void drawEnvelope(int argCount)
 {
 	glPushMatrix();
-	glColor4f(0.7f, 0.7f, 0.2f, 1.0f);
+	glColor4f(0.5f, 0.5f, 0.07f, 1.0f);
 	glBegin(GL_QUADS);
 	glVertex2f(0.8f, 0.5f);
 	glVertex2f(0.8f, -0.5f);
 	glVertex2f(-0.8f, -0.5f);
 	glVertex2f(-0.8f, 0.5f);
+	glEnd();
+	glColor4f(0.3f, 0.3f, 0.3f, 1.0f);
+	glBegin(GL_LINES);
+	glVertex2f(0.8f, 0.5f);
+	glVertex2f(-0.8f, -0.5f);
+	glVertex2f(-0.8f, 0.5f);
+	glVertex2f(0.8f, -0.5f);
 	glEnd();
 	glPopMatrix();
 }

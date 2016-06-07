@@ -37,7 +37,7 @@ void Buffer::renderPackets(int argPacketId /*-1*/) const
 	{
 		if (argPacketId == -1 || argPacketId == packetVector[i].id)
 		{
-			glTranslatef(0.6f, 0.6f, 0.0f);
+			glTranslatef(0.6f, 0.4f, 0.0f);
 			Utils::drawEnvelope(packetVector[i].numCopies);
 		}
 	}

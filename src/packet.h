@@ -8,7 +8,7 @@
 #include <iostream>
 
 //Parameters
-const float GEN_RATE = 0.0001f;
+const float GEN_RATE = 0.0002f;
 
 const int MIN_PACKET_SIZE = 500;
 const int MAX_PACKET_SIZE = 1000;

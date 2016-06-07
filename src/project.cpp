@@ -37,7 +37,7 @@ void displayFunc()
 	{
 		glPushMatrix();
 		glTranslatef(tempNodeVector[i]->getPosn().x, tempNodeVector[i]->getPosn().y, 0.0f);
-		Utils::drawCircle(0.3f, Utils::Color(0.2f, 0.4f, 0.6f));
+		Utils::drawCircle(0.4f, Utils::Color(0.2f, 0.4f, 0.6f));
 		tempNodeVector[i]->renderPackets();
 		
 		//Wireless range circles
