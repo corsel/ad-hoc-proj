@@ -30,6 +30,7 @@ struct Color
 	
 	Color(void);
 	Color(float argRed, float argGreen, float argBlue, float argAlpha = 1.0f);
+	static Color getRandomColor(void);
 };
 
 void drawCircle(float argRadius, Color argColor, bool argFilled = true, bool argDashed = false);

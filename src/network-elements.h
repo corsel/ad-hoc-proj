@@ -7,6 +7,8 @@
 #include "mobility.h"
 #include <vector>
 
+const int NUM_PACKETS = 3;
+
 class Node
 {
 private: 

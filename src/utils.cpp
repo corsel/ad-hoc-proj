@@ -35,6 +35,11 @@ Color::Color()
 : red(float(rand() % 1000) / 1000.0f), green(float(rand() % 1000) / 1000.0f), blue(float(rand() % 1000) / 1000.0f) {}
 Color::Color(float argRed, float argGreen, float argBlue, float argAlpha /*= 1.0f*/)
 : red(argRed), green(argGreen), blue(argBlue), alpha(argAlpha) {}
+Color Color::getRandomColor() //static
+{
+	return Color(float(rand() % 100) / 100.0f, float(rand() % 100) / 100.0f, float(rand() % 100) / 100.0f);
+}
+
 void drawCircle(float argRadius, Color argColor, bool argFilled/* = true*/, bool argDashed/*= false*/)
 {
 	glPushMatrix();
@@ -73,7 +78,6 @@ void drawCircle(float argRadius, Color argColor, bool argFilled/* = true*/, bool
 void drawEnvelope(int argCount)
 {
 	glPushMatrix();
-	glColor4f(0.5f, 0.5f, 0.07f, 1.0f);
 	glBegin(GL_QUADS);
 	glVertex2f(0.8f, 0.5f);
 	glVertex2f(0.8f, -0.5f);
@@ -87,6 +91,15 @@ void drawEnvelope(int argCount)
 	glVertex2f(-0.8f, 0.5f);
 	glVertex2f(0.8f, -0.5f);
 	glEnd();
+	if (argCount == 1)
+	{
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glBegin(GL_TRIANGLES);
+		glVertex2f(0.25f, -0.75f);
+		glVertex2f(0.5f, -0.5f);
+		glVertex2f(0.75f, -0.75f);
+		glEnd();
+	}
 	glPopMatrix();
 }
 }

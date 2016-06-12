@@ -14,9 +14,15 @@ void Node::updateContacts()
 		if (tempNodeVector[i]->id == id)
 			continue;
 		if (Utils::Vec2::getSqrDistance(getPosn(), tempNodeVector[i]->getPosn()) <= WIRELESS_RANGE * WIRELESS_RANGE)
+		{
 			contactNodes.push_back(tempNodeVector[i]);
+		}
 	}
-
+	for (int i = 0; i < contactNodes.size(); i++)
+	{
+		//std::cout << "debug - Node::updateContacts: syncing buffers: " << id << " - " << contactNodes[i]->id << std::endl;
+		contactNodes[i]->buffer.syncBuffers(&buffer);
+	}
 }
 void Node::renderContacts()
 {
@@ -49,13 +55,13 @@ void Node::renderWypts()
 Node::Node() 
 : range(3.0f)
 {
-	generator = new NPacketGenerator(10);
+	generator = new NPacketGenerator(NUM_PACKETS);
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::Node(Utils::Vec2 argPosn, float argRange)
 : range(argRange), mobility(Mobility(argPosn))
 {
-	generator = new NPacketGenerator(10);
+	generator = new NPacketGenerator(NUM_PACKETS);
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::~Node() {}
@@ -68,9 +74,9 @@ void Node::update()
 	updateMovement();
 	updateContacts();
 	
-	Packet const *tempPacket = generator->update(id, NodeContainer::getRandomDst(id));
+	Packet *tempPacket = generator->update(id, NodeContainer::getRandomDst(id));
 	if (tempPacket)
-		buffer.receive(tempPacket);
+		buffer.push(*tempPacket);
 	
 	if (showContacts)
 		renderContacts();

@@ -8,7 +8,7 @@
 #include <iostream>
 
 //Parameters
-const float GEN_RATE = 0.0002f;
+const float GEN_RATE = 0.0005f;
 
 const int MIN_PACKET_SIZE = 500;
 const int MAX_PACKET_SIZE = 1000;
@@ -40,6 +40,7 @@ private:
 public:
 	Packet(void);
 	Packet(int argSrcId, int argDstId, int argSize);
+	Packet binarySplit(void);
 	int getId(void) const;
 	int getSrc(void) const;
 	int getDst(void) const;
@@ -55,7 +56,7 @@ private:
 public:
 	Buffer(void);
 	void syncBuffers(Buffer *argOther);
-	bool receive(Packet const *argPacket);
+	bool push(Packet argPacket);
 	void renderPackets(int argPacketId = -1) const;
 };
 
@@ -67,7 +68,7 @@ protected:
 public:
 	PacketGenerator(void);
 	~PacketGenerator(void);
-	virtual Packet const *update(int argSrc, int argDst) = 0;
+	virtual Packet *update(int argSrc, int argDst) = 0;
 };
 
 class RandomPacketGenerator : public PacketGenerator
@@ -76,7 +77,7 @@ private:
 public:
 	RandomPacketGenerator(void);
 	~RandomPacketGenerator(void);
-	Packet const *update(int argSrc, int argDst); //virtual implementation
+	Packet *update(int argSrc, int argDst); //virtual implementation
 };
 
 class NPacketGenerator : public PacketGenerator
@@ -88,7 +89,7 @@ private:
 public:
 	NPacketGenerator(int argLimPackets);
 	~NPacketGenerator(void);
-	Packet const *update(int argSrc, int argDst); //virtual implementation
+	Packet *update(int argSrc, int argDst); //virtual implementation
 };
 
 #endif //PACKET_H_INCLUDED

@@ -4,7 +4,14 @@
 int Packet::packetCounter = 0;
 Packet::Packet() {}
 Packet::Packet(int argSrcId, int argDstId, int argSize)
-: srcId(argSrcId), dstId(argDstId), size(argSize), id(Packet::packetCounter++) {}
+: srcId(argSrcId), dstId(argDstId), size(argSize), id(Packet::packetCounter++), numCopies(SAW_COPIES), color(Utils::Color::getRandomColor()) {}
+Packet Packet::binarySplit()
+{
+	Packet returnPacket = *this;
+	returnPacket.numCopies = numCopies / 2 + numCopies % 2;
+	numCopies = numCopies / 2;
+	return returnPacket;
+}
 int Packet::getId() const {	return id; }
 int Packet::getSrc() const { return srcId; }
 int Packet::getDst() const { return dstId; }
@@ -14,22 +21,31 @@ Buffer::Buffer()
 : size(BUFFER_SIZE) {}
 void Buffer::syncBuffers(Buffer *argOther)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < argOther->packetVector.size(); i++)
 	{
-		for (int j = 0; j < argOther->size; j++)
+		bool havePacketFlag = false;
+		if (argOther->packetVector[i].numCopies == 1) 
+			havePacketFlag = true;
+		for (int j = 0; j < packetVector.size(); j++)
 		{
-			
+			if (argOther->packetVector[i].id == packetVector[j].id)
+				havePacketFlag = true;
+		}
+		if (!havePacketFlag)
+		{
+			std::cout << "debug - Buffer::syncBuffers: transaction occured; packet id: " << argOther->packetVector[i].id << std::endl;
+			push(argOther->packetVector[i].binarySplit());
 		}
 	}
 }
-bool Buffer::receive(Packet const *argPacket)
+bool Buffer::push(Packet argPacket)
 {
-	if (size < argPacket->size + used)
+	if (size < argPacket.size + used)
 	{
-		std::cout << "debug - Buffer::receive: buffer full, dropping packet " << argPacket->id << ".\n";
+		std::cout << "debug - Buffer::push: buffer full, dropping packet " << argPacket.id << ".\n";
 		return false;
 	}
-	packetVector.push_back(*argPacket);
+	packetVector.push_back(argPacket);
 }
 void Buffer::renderPackets(int argPacketId /*-1*/) const
 {
@@ -38,6 +54,7 @@ void Buffer::renderPackets(int argPacketId /*-1*/) const
 		if (argPacketId == -1 || argPacketId == packetVector[i].id)
 		{
 			glTranslatef(0.6f, 0.4f, 0.0f);
+			glColor3f(packetVector[i].color.red, packetVector[i].color.green, packetVector[i].color.blue);
 			Utils::drawEnvelope(packetVector[i].numCopies);
 		}
 	}
@@ -52,7 +69,7 @@ PacketGenerator::~PacketGenerator() { delete returnPacket; }
 RandomPacketGenerator::RandomPacketGenerator()
 : PacketGenerator() {}
 RandomPacketGenerator::~RandomPacketGenerator() {}
-Packet const *RandomPacketGenerator::update(int argSrc, int argDst)
+Packet *RandomPacketGenerator::update(int argSrc, int argDst)
 {
 	if (rand() % 1000000 > int(GEN_RATE * 1000000))
 		return NULL;
@@ -66,7 +83,7 @@ int NPacketGenerator::numPackets = 0;
 NPacketGenerator::NPacketGenerator(int argLimPackets)
 : limPackets(argLimPackets), PacketGenerator() {}
 NPacketGenerator::~NPacketGenerator() {}
-Packet const *NPacketGenerator::update(int argSrc, int argDst) 
+Packet *NPacketGenerator::update(int argSrc, int argDst) 
 {
 	if (NPacketGenerator::numPackets > limPackets)
 		return NULL;

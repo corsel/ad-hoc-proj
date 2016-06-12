@@ -10,7 +10,7 @@
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const Utils::Vec2 FIELD_SIZE(50.0f, 50.0f);
-const int NUM_INIT_NODES = 15;
+const int NUM_INIT_NODES = 7;
 const float WIRELESS_RANGE = 6.0f;
 bool showContacts = true;
 bool showRanges = true;
@@ -37,7 +37,7 @@ void displayFunc()
 	{
 		glPushMatrix();
 		glTranslatef(tempNodeVector[i]->getPosn().x, tempNodeVector[i]->getPosn().y, 0.0f);
-		Utils::drawCircle(0.4f, Utils::Color(0.2f, 0.4f, 0.6f));
+		Utils::drawCircle(0.5f, Utils::Color(0.2f, 0.4f, 0.6f));
 		tempNodeVector[i]->renderPackets();
 		
 		//Wireless range circles
