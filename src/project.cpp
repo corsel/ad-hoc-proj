@@ -3,23 +3,24 @@
 #include "utils.h"
 #include <GL/gl.h>
 #include <GL/freeglut.h>
-//#include <stdlib.h>
 #include <time.h>
 #include <iostream>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const Utils::Vec2 FIELD_SIZE(50.0f, 50.0f);
-const int NUM_INIT_NODES = 7;
+const int NUM_INIT_NODES = 17;
 const float WIRELESS_RANGE = 6.0f;
 bool showContacts = true;
 bool showRanges = true;
 bool showWypts = true;
 bool showPackets = true;
 const float SCALE_FACTOR = 0.03f;
+long int globalFrame = 0;
 
 void displayFunc()
 {
+	globalFrame++;
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
@@ -37,8 +38,10 @@ void displayFunc()
 	{
 		glPushMatrix();
 		glTranslatef(tempNodeVector[i]->getPosn().x, tempNodeVector[i]->getPosn().y, 0.0f);
+		//glPushMatrix();
+		tempNodeVector[i]->updateBuffer();
+		//glPopMatrix();
 		Utils::drawCircle(0.5f, Utils::Color(0.2f, 0.4f, 0.6f));
-		tempNodeVector[i]->renderPackets();
 		
 		//Wireless range circles
 		if (showRanges)
@@ -60,8 +63,6 @@ void displayFunc()
 	glEnd();
 	glPopAttrib();
 	glPopMatrix();
-	
-	NodeContainer::getInstance()->update();
 	
 	glutSwapBuffers();
 }

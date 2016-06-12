@@ -3,9 +3,12 @@
 
 #include "ext-params.h"
 #include "utils.h"
+#include "network-elements.h"
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
+
+class Node; //forward declaration...
 
 //Parameters
 const float GEN_RATE = 0.0005f;
@@ -17,6 +20,7 @@ const int HEADER_SIZE = 30;
 
 const int BUFFER_SIZE = 10000;
 const int SAW_COPIES = 5; //saw: spray and wait
+const int SAW_TTL = 1000;
 
 const int BANDWIDTH = 200;
 const float FADE = 2.0f;
@@ -35,6 +39,7 @@ private:
 	int srcId;
 	int dstId;
 	int numCopies;
+	unsigned long int timeOfDeath;
 	Utils::Color color;
 	
 public:
@@ -49,15 +54,16 @@ public:
 class Buffer
 {
 private:
+	Node * const parentNode;
 	std::vector<Packet> packetVector;
 	int size;
 	int used;
 	
 public:
-	Buffer(void);
+	Buffer(Node *argParentNode = NULL);
 	void syncBuffers(Buffer *argOther);
 	bool push(Packet argPacket);
-	void renderPackets(int argPacketId = -1) const;
+	void updatePackets(int argPacketId = -1);
 };
 
 class PacketGenerator

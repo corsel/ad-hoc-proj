@@ -1,7 +1,7 @@
 #include "mobility.h"
 
-const int MIN_SPEED = 1;
-const int MAX_SPEED = 4;
+const int MIN_SPEED = 2;
+const int MAX_SPEED = 5;
 const int MAX_WAIT = 500;
 
 //Mobility class

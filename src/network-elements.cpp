@@ -20,8 +20,7 @@ void Node::updateContacts()
 	}
 	for (int i = 0; i < contactNodes.size(); i++)
 	{
-		//std::cout << "debug - Node::updateContacts: syncing buffers: " << id << " - " << contactNodes[i]->id << std::endl;
-		contactNodes[i]->buffer.syncBuffers(&buffer);
+		contactNodes[i]->buffer->syncBuffers(buffer);
 	}
 }
 void Node::renderContacts()
@@ -55,13 +54,15 @@ void Node::renderWypts()
 Node::Node() 
 : range(3.0f)
 {
-	generator = new NPacketGenerator(NUM_PACKETS);
+	buffer = new Buffer(this);
+	generator = new NPacketGenerator(NUM_GENERATED_PACKETS);
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::Node(Utils::Vec2 argPosn, float argRange)
 : range(argRange), mobility(Mobility(argPosn))
 {
-	generator = new NPacketGenerator(NUM_PACKETS);
+	buffer = new Buffer(this);
+	generator = new NPacketGenerator(NUM_GENERATED_PACKETS);
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::~Node() {}
@@ -76,16 +77,16 @@ void Node::update()
 	
 	Packet *tempPacket = generator->update(id, NodeContainer::getRandomDst(id));
 	if (tempPacket)
-		buffer.push(*tempPacket);
+		buffer->push(*tempPacket);
 	
 	if (showContacts)
 		renderContacts();
 	if (showWypts)
 		renderWypts();
 }
-void Node::renderPackets(int argPacketId) const 
+void Node::updateBuffer(int argPacketId)
 {
-	buffer.renderPackets();
+	buffer->updatePackets();
 }
 
 //NodeContainer singleton class

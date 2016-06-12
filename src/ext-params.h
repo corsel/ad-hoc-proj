@@ -9,5 +9,6 @@ extern bool showContacts;
 extern bool showRanges;
 extern bool showWypts;
 extern bool showPackets;
+extern long int globalFrame;
 
 #endif //EXT_PARAMS_H_INCLUDED

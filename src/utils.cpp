@@ -95,9 +95,9 @@ void drawEnvelope(int argCount)
 	{
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glBegin(GL_TRIANGLES);
-		glVertex2f(0.25f, -0.75f);
+		glVertex2f(0.2f, -0.95f);
 		glVertex2f(0.5f, -0.5f);
-		glVertex2f(0.75f, -0.75f);
+		glVertex2f(0.8f, -0.95f);
 		glEnd();
 	}
 	glPopMatrix();

@@ -4,12 +4,16 @@
 int Packet::packetCounter = 0;
 Packet::Packet() {}
 Packet::Packet(int argSrcId, int argDstId, int argSize)
-: srcId(argSrcId), dstId(argDstId), size(argSize), id(Packet::packetCounter++), numCopies(SAW_COPIES), color(Utils::Color::getRandomColor()) {}
+: srcId(argSrcId), dstId(argDstId), size(argSize), id(Packet::packetCounter++), numCopies(SAW_COPIES), color(Utils::Color::getRandomColor()), timeOfDeath(0) {}
 Packet Packet::binarySplit()
 {
 	Packet returnPacket = *this;
-	returnPacket.numCopies = numCopies / 2 + numCopies % 2;
-	numCopies = numCopies / 2;
+	returnPacket.numCopies = numCopies / 2;
+	numCopies = numCopies / 2 + numCopies % 2;
+	if (returnPacket.numCopies == 1)
+		returnPacket.timeOfDeath = globalFrame + SAW_TTL;
+	if (numCopies == 1)
+		timeOfDeath = globalFrame + SAW_TTL;
 	return returnPacket;
 }
 int Packet::getId() const {	return id; }
@@ -17,23 +21,29 @@ int Packet::getSrc() const { return srcId; }
 int Packet::getDst() const { return dstId; }
 
 //Buffer class
-Buffer::Buffer()
-: size(BUFFER_SIZE) {}
+Buffer::Buffer(Node *argParentNode /* = NULL */)
+: size(BUFFER_SIZE), parentNode(argParentNode) {}
 void Buffer::syncBuffers(Buffer *argOther)
 {
 	for (int i = 0; i < argOther->packetVector.size(); i++)
 	{
-		bool havePacketFlag = false;
+		bool skipPacketFlag = false;
 		if (argOther->packetVector[i].numCopies == 1) 
-			havePacketFlag = true;
+			skipPacketFlag = true;
 		for (int j = 0; j < packetVector.size(); j++)
 		{
+			if (argOther->packetVector[i].dstId == parentNode->id)
+			{
+				std::cout << "debug - Buffer::syncBuffers: destination reached; packet id: " << packetVector[i].id << std::endl;
+				argOther->packetVector.erase(argOther->packetVector.begin() + i);
+				skipPacketFlag = true;
+			}
 			if (argOther->packetVector[i].id == packetVector[j].id)
-				havePacketFlag = true;
+				skipPacketFlag = true;
 		}
-		if (!havePacketFlag)
+		if (!skipPacketFlag)
 		{
-			std::cout << "debug - Buffer::syncBuffers: transaction occured; packet id: " << argOther->packetVector[i].id << std::endl;
+			//std::cout << "debug - Buffer::syncBuffers: transaction occured; packet id: " << argOther->packetVector[i].id << std::endl;
 			push(argOther->packetVector[i].binarySplit());
 		}
 	}
@@ -47,10 +57,18 @@ bool Buffer::push(Packet argPacket)
 	}
 	packetVector.push_back(argPacket);
 }
-void Buffer::renderPackets(int argPacketId /*-1*/) const
+void Buffer::updatePackets(int argPacketId /*-1*/)
 {
+	glPushMatrix();
 	for (int i = 0; i < packetVector.size(); i++)
 	{
+		if (packetVector[i].timeOfDeath <= globalFrame && packetVector[i].timeOfDeath > 0)
+		{
+			std::cout << "debug - Buffer::updatePackets: ttl reached, dropping packet " << packetVector[i].id << " from node " << parentNode->id << std::endl;
+			packetVector.erase(packetVector.begin() + i);
+			for (int k = 0; k < packetVector.size(); k++)
+				std::cout << "\telement " << k << ": " << packetVector[i].id << std::endl;
+		}
 		if (argPacketId == -1 || argPacketId == packetVector[i].id)
 		{
 			glTranslatef(0.6f, 0.4f, 0.0f);
@@ -58,6 +76,7 @@ void Buffer::renderPackets(int argPacketId /*-1*/) const
 			Utils::drawEnvelope(packetVector[i].numCopies);
 		}
 	}
+	glPopMatrix();
 }
 
 //PacketGenerator class

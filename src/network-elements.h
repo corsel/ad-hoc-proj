@@ -7,17 +7,22 @@
 #include "mobility.h"
 #include <vector>
 
-const int NUM_PACKETS = 3;
+const int NUM_GENERATED_PACKETS = 3;
+
+class Buffer; //forward declaration...
+class PacketGenerator; //forward declaration...
 
 class Node
 {
 private: 
 	Mobility mobility;
-	Buffer buffer;
+	Buffer *buffer;
 	PacketGenerator *generator;
 	int id;
 	float range;
 	std::vector<Node*> contactNodes;
+	
+	friend class Buffer;
 	
 	void updateMovement(void);
 	void updateContacts(void);
@@ -30,7 +35,7 @@ public:
 	~Node(void);
 	Utils::Vec2 getPosn(void);
 	void update(void);
-	void renderPackets(int argPacketId = -1) const;
+	void updateBuffer(int argPacketId = -1);
 };
 
 
