@@ -75,7 +75,7 @@ void drawCircle(float argRadius, Color argColor, bool argFilled/* = true*/, bool
 	glPopAttrib();
 	glPopMatrix();
 }
-void drawEnvelope(int argCount)
+void drawEnvelope(int argCount, bool argIsDelivered /* = false */)
 {
 	glPushMatrix();
 	glBegin(GL_QUADS);
@@ -91,15 +91,20 @@ void drawEnvelope(int argCount)
 	glVertex2f(-0.8f, 0.5f);
 	glVertex2f(0.8f, -0.5f);
 	glEnd();
+	
+	if (!argIsDelivered)
+		glColor3f(1.0f, 0.0f, 0.0f);
+	else
+		glColor3f(0.0f, 1.0f, 0.0f);
 	if (argCount == 1)
 	{
-		glColor3f(1.0f, 0.0f, 0.0f);
 		glBegin(GL_TRIANGLES);
 		glVertex2f(0.2f, -0.95f);
 		glVertex2f(0.5f, -0.5f);
 		glVertex2f(0.8f, -0.95f);
 		glEnd();
 	}
+	
 	glPopMatrix();
 }
 }

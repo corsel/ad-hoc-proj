@@ -7,7 +7,7 @@
 #include "mobility.h"
 #include <vector>
 
-const int NUM_GENERATED_PACKETS = 3;
+const int NUM_GENERATED_PACKETS = 7;
 
 class Buffer; //forward declaration...
 class PacketGenerator; //forward declaration...
@@ -33,7 +33,8 @@ public:
 	Node(void);
 	Node(Utils::Vec2 argPosn, float argRange);
 	~Node(void);
-	Utils::Vec2 getPosn(void);
+	int getId(void) const;
+	Utils::Vec2 getPosn(void) const;
 	void update(void);
 	void updateBuffer(int argPacketId = -1);
 };
@@ -49,6 +50,7 @@ private:
 	NodeContainer(void);
 	
 public:
+	~NodeContainer(void);
 	static NodeContainer* getInstance(void);
 	void init(int argNumNodes);
 	void update(void);

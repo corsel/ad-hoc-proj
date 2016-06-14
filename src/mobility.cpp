@@ -1,9 +1,5 @@
 #include "mobility.h"
 
-const int MIN_SPEED = 2;
-const int MAX_SPEED = 5;
-const int MAX_WAIT = 500;
-
 //Mobility class
 bool Mobility::inProximity(Utils::Vec2 argOther)
 {

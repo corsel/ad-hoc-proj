@@ -4,7 +4,7 @@
 int Packet::packetCounter = 0;
 Packet::Packet() {}
 Packet::Packet(int argSrcId, int argDstId, int argSize)
-: srcId(argSrcId), dstId(argDstId), size(argSize), id(Packet::packetCounter++), numCopies(SAW_COPIES), color(Utils::Color::getRandomColor()), timeOfDeath(0) {}
+: srcId(argSrcId), dstId(argDstId), size(argSize), id(Packet::packetCounter++), numCopies(SAW_COPIES), color(Utils::Color::getRandomColor()), timeOfDeath(0), isDelivered(false) {}
 Packet Packet::binarySplit()
 {
 	Packet returnPacket = *this;
@@ -25,36 +25,54 @@ Buffer::Buffer(Node *argParentNode /* = NULL */)
 : size(BUFFER_SIZE), parentNode(argParentNode) {}
 void Buffer::syncBuffers(Buffer *argOther)
 {
-	for (int i = 0; i < argOther->packetVector.size(); i++)
+	for (int i = 0; i < packetVector.size(); i++)
 	{
-		bool skipPacketFlag = false;
-		if (argOther->packetVector[i].numCopies == 1) 
-			skipPacketFlag = true;
-		for (int j = 0; j < packetVector.size(); j++)
+		if (packetVector[i].isDelivered) continue;
+		int alreadyHasIndex = -1;
+		for (int j = 0; j < argOther->packetVector.size(); j++)
 		{
-			if (argOther->packetVector[i].dstId == parentNode->id)
-			{
-				std::cout << "debug - Buffer::syncBuffers: destination reached; packet id: " << packetVector[i].id << std::endl;
-				argOther->packetVector.erase(argOther->packetVector.begin() + i);
-				skipPacketFlag = true;
-			}
-			if (argOther->packetVector[i].id == packetVector[j].id)
-				skipPacketFlag = true;
+			alreadyHasIndex = (packetVector[i].id == argOther->packetVector[j].id) ? j : alreadyHasIndex;
 		}
-		if (!skipPacketFlag)
+		
+		if (alreadyHasIndex == -1 && packetVector[i].numCopies > 1)
 		{
-			//std::cout << "debug - Buffer::syncBuffers: transaction occured; packet id: " << argOther->packetVector[i].id << std::endl;
-			push(argOther->packetVector[i].binarySplit());
+			argOther->push(packetVector[i].binarySplit());
+			continue;
+		}
+		else if (alreadyHasIndex != -1)
+		{
+			if (argOther->parentNode->id == packetVector[i].dstId)
+			{
+				if (argOther->packetVector[alreadyHasIndex].isDelivered)
+				{
+					std::cout << "debug - Buffer::syncBuffers: already delivered packet, dropping...\n";
+					packetVector.erase(packetVector.begin() + i);
+					//argOther->packetVector.erase(argOther->packetVector.begin() + alreadyHasIndex);
+					i--;
+				}
+				else
+				{
+					packetVector[i].isDelivered = true;
+					packetVector[i].numCopies = 1;
+					std::cout << "debug - Buffer::syncBuffers: packet delivered; id: " << packetVector[i].id << ", dst: " << packetVector[i].dstId << std::endl;
+					argOther->push(packetVector[i]);
+					packetVector.erase(packetVector.begin() + i);
+					argOther->packetVector.erase(argOther->packetVector.begin() + alreadyHasIndex);
+					i--;
+				}
+			}
 		}
 	}
 }
 bool Buffer::push(Packet argPacket)
 {
+	/*
 	if (size < argPacket.size + used)
 	{
 		std::cout << "debug - Buffer::push: buffer full, dropping packet " << argPacket.id << ".\n";
 		return false;
 	}
+	*/
 	packetVector.push_back(argPacket);
 }
 void Buffer::updatePackets(int argPacketId /*-1*/)
@@ -62,18 +80,16 @@ void Buffer::updatePackets(int argPacketId /*-1*/)
 	glPushMatrix();
 	for (int i = 0; i < packetVector.size(); i++)
 	{
-		if (packetVector[i].timeOfDeath <= globalFrame && packetVector[i].timeOfDeath > 0)
+		if (packetVector[i].timeOfDeath <= globalFrame && packetVector[i].timeOfDeath > 0 && !packetVector[i].isDelivered)
 		{
 			std::cout << "debug - Buffer::updatePackets: ttl reached, dropping packet " << packetVector[i].id << " from node " << parentNode->id << std::endl;
 			packetVector.erase(packetVector.begin() + i);
-			for (int k = 0; k < packetVector.size(); k++)
-				std::cout << "\telement " << k << ": " << packetVector[i].id << std::endl;
 		}
 		if (argPacketId == -1 || argPacketId == packetVector[i].id)
 		{
 			glTranslatef(0.6f, 0.4f, 0.0f);
 			glColor3f(packetVector[i].color.red, packetVector[i].color.green, packetVector[i].color.blue);
-			Utils::drawEnvelope(packetVector[i].numCopies);
+			Utils::drawEnvelope(packetVector[i].numCopies, packetVector[i].isDelivered ? true : false);
 		}
 	}
 	glPopMatrix();
@@ -104,7 +120,7 @@ NPacketGenerator::NPacketGenerator(int argLimPackets)
 NPacketGenerator::~NPacketGenerator() {}
 Packet *NPacketGenerator::update(int argSrc, int argDst) 
 {
-	if (NPacketGenerator::numPackets > limPackets)
+	if (NPacketGenerator::numPackets >= limPackets)
 		return NULL;
 	if (rand() % 1000000 > int(GEN_RATE * 1000000))
 		return NULL;

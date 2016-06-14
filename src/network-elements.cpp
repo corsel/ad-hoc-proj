@@ -42,14 +42,14 @@ void Node::renderContacts()
 void Node::renderWypts()
 {
 	//Waypoints
-	glPushAttrib(GL_LINE_BIT);
-	glPushMatrix();
+	//glPushAttrib(GL_LINE_BIT);
+	//glPushMatrix();
 	glColor3f(0.25f, 0.25f, 0.3f);
 	glVertex2f(getPosn().x, getPosn().y);
 	glVertex2f(mobility.getRandWypt().x, mobility.getRandWypt().y);
 	glEnd();
-	glPopMatrix();
-	glPopAttrib();
+	//glPopMatrix();
+	//glPopAttrib();
 }
 Node::Node() 
 : range(3.0f)
@@ -66,7 +66,8 @@ Node::Node(Utils::Vec2 argPosn, float argRange)
 	id = NodeContainer::getInstance()->getNewId();
 }
 Node::~Node() {}
-Utils::Vec2 Node::getPosn()
+int Node::getId() const { return id; }
+Utils::Vec2 Node::getPosn() const
 {
 	return mobility.getPosn();
 }
@@ -93,6 +94,13 @@ void Node::updateBuffer(int argPacketId)
 NodeContainer *NodeContainer::instance = NULL;
 int NodeContainer::idCounter = 0;
 NodeContainer::NodeContainer() {}
+NodeContainer::~NodeContainer()
+{
+	for (int i = 0; i < nodeVector.size(); i++)
+	{
+		delete nodeVector[i];
+	}
+}
 NodeContainer *NodeContainer::getInstance()
 {
 	if (instance == NULL)
@@ -103,12 +111,11 @@ void NodeContainer::init(int argNumNodes)
 {
 	srand(time(NULL));
 	Utils::Vec2 tempVec2;
-	Node tempNode;
 	for (int i = 0; i < argNumNodes; i++)
 	{
 		tempVec2 = Utils::Vec2(rand() % (int)FIELD_SIZE.x - (int)FIELD_SIZE.x / 2.0f, rand() % (int)FIELD_SIZE.y - (int)FIELD_SIZE.y / 2.0f);
-		tempNode = Node(tempVec2, 2.0f);
-		nodeVector.push_back(new Node(tempNode));
+		//std::cout << "debug - NodeContainer::init: generated node...\n";
+		nodeVector.push_back(new Node(tempVec2, 2.0f));
 	}
 }
 void NodeContainer::update()
@@ -120,6 +127,7 @@ void NodeContainer::update()
 }
 int NodeContainer::getNewId()
 {
+	//std::cout << "debug - NodeContainer::getNewId: generated id: " << idCounter << std::endl;
 	return idCounter++;
 }
 std::vector<Node*> NodeContainer::getNodeVector() const

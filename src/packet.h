@@ -40,6 +40,7 @@ private:
 	int dstId;
 	int numCopies;
 	unsigned long int timeOfDeath;
+	bool isDelivered;
 	Utils::Color color;
 	
 public:
@@ -58,6 +59,13 @@ private:
 	std::vector<Packet> packetVector;
 	int size;
 	int used;
+	
+	struct Match
+	{
+		bool alreadyHas;
+		int thisIndex;
+		int otherIndex;
+	};
 	
 public:
 	Buffer(Node *argParentNode = NULL);

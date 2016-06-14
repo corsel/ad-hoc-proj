@@ -9,7 +9,7 @@
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const Utils::Vec2 FIELD_SIZE(50.0f, 50.0f);
-const int NUM_INIT_NODES = 17;
+const int NUM_INIT_NODES = 15;
 const float WIRELESS_RANGE = 6.0f;
 bool showContacts = true;
 bool showRanges = true;

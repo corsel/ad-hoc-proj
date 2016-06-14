@@ -4,6 +4,10 @@
 #include "ext-params.h"
 #include "utils.h"
 
+const int MIN_SPEED = 5;
+const int MAX_SPEED = 10;
+const int MAX_WAIT = 500;
+
 class Mobility
 {
 private:

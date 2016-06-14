@@ -34,7 +34,7 @@ struct Color
 };
 
 void drawCircle(float argRadius, Color argColor, bool argFilled = true, bool argDashed = false);
-void drawEnvelope(int argCount);
+void drawEnvelope(int argCount, bool argIsDest = false);
 }
 
 #endif //UTILS_H_INCLUDED
